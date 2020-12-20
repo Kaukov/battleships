@@ -4,7 +4,7 @@ require_relative 'battleships'
 
 # Valid when we have the following vessels not touching:
 # 1 Battleship (4 cells)
-# 2 Crusiers (3 cells)
+# 2 Cruisers (3 cells)
 # 3 Destroyers (2 cells)
 # 4 Submarines (1 cell)
 
@@ -105,4 +105,3 @@ RSpec.configure do |config|
     rspec.syntax = :should
   end
 end
-
