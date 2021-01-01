@@ -25,6 +25,14 @@ class Battleships
     # on the board placement of the battleships
     game_board = []
 
+    # Count all ship types on the board
+    @ships = {
+      "#{SIZE_BATTLESHIP}": 0,
+      "#{SIZE_CRUISER}": 0,
+      "#{SIZE_DESTROYER}": 0,
+      "#{SIZE_SUBMARINE}": 0
+    }
+
     # Fill the game board with 0s and 1s by reading each line of the input string
     input.lines.each_with_index { |str| game_board << ships_from_string(str) }
   end
@@ -42,7 +50,18 @@ class Battleships
     arr
   end
 
+  def valid_ship_counts?
+    return false if (@ships[:"#{SIZE_BATTLESHIP}"] <=> COUNT_BATTLESHIPS) != 0
+    return false if (@ships[:"#{SIZE_CRUISER}"] <=> COUNT_CRUISERS) != 0
+    return false if (@ships[:"#{SIZE_DESTROYER}"] <=> COUNT_DESTROYERS) != 0
+    return false if (@ships[:"#{SIZE_SUBMARINE}"] <=> COUNT_SUBMARINES) != 0
+
+    true
+  end
+
   def valid?
+    return false unless valid_ship_counts?
+
     true
   end
 end
