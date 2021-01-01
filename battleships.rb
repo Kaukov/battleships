@@ -21,6 +21,25 @@ class Battleships
   SIZE_MAX = SIZE_BATTLESHIP
 
   def initialize(input)
+    # Array to be filled with 0s and 1s depending
+    # on the board placement of the battleships
+    game_board = []
+
+    # Fill the game board with 0s and 1s by reading each line of the input string
+    input.lines.each_with_index { |str| game_board << ships_from_string(str) }
+  end
+
+  # Returns an array of 0s and 1s, indicating battleship placements
+  # from a string of battleship placement characters
+  def ships_from_string(str)
+    arr = []
+
+    str.chars.each do |ch|
+      arr << 1 if ch == CHAR_SHIP
+      arr << 0 if ch == CHAR_EMPTYSPACE
+    end
+
+    arr
   end
 
   def valid?
