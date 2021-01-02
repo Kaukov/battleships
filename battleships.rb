@@ -85,8 +85,7 @@ class Battleships
         # If the current ship part is touching another ship part,
         # or if the current ship size is larger than the @max_ship_size,
         # set the @valid_board flag to false
-        @valid_board = false if c == 1 && check_touching_ships?(idx, row_idx, board_to_check) ||
-                                current_ship > @max_ship_size
+        @valid_board = false if check_touching_ships?(c, idx, row_idx, board_to_check) || current_ship > @max_ship_size
 
         # Checks if the current ship being checked is vertical,
         # if so - reset the counter and continue looking for other ships
@@ -96,11 +95,8 @@ class Battleships
         end
 
         # Skips to the next iteration unless the current element is not a ship part,
-        # or it's the last element of the row
-        next unless c.zero? || idx == row.length - 1
-
-        # Skips to the next iteration if the counter is 0
-        next unless current_ship.positive?
+        # or it's the last element of the row, or if the counter is 0
+        next unless (c.zero? || idx == row.length - 1) && current_ship.positive?
 
         # If it's a submarine (size 1) and a transposed board is being checked,
         # reset the counter and skip to the next iteration
@@ -142,26 +138,62 @@ class Battleships
   # Checks if a current ship part is touching another ship part either
   # above on the left and/or on the right,
   # or below on the left and/or on the right
+  # @param [Numeric] current - The current character is either a ship part or not
   # @param [Numeric] idx - The index of the current character being checked
   # @param [Numeric] row_idx - The index of the row being checked from the board array
   # @param [Enumerable] board - The current board being checked - either normal or transposed
   # @return [Boolean]
-  def check_touching_ships?(idx, row_idx, board)
-    # Flag to check if touching a ship part on the top left
-    top_left = row_idx.positive? && idx.positive? && board[row_idx - 1][idx - 1] == 1
+  def check_touching_ships?(current, idx, row_idx, board)
+    # Flag describing if a ship part is touching another ship part on either
+    # the top left and/or the top right
+    top_touching = check_top_touching_part? idx, row_idx, board
 
-    # Flag to check if touching a ship part on the top right
-    top_right = row_idx.positive? && idx < board[row_idx].length - 1 && board[row_idx - 1][idx + 1] == 1
+    # Flag describing if a ship part is touching another ship part on either
+    # the bottom left and/or the bottom right
+    bottom_touching = check_bottom_touching_part? idx, row_idx, board
 
-    # Flag to check if touching a ship part on the bottom left
-    bottom_left = row_idx < board.length - 1 && idx.positive? && board[row_idx + 1][idx - 1] == 1
+    # Returns true if either top and/or bottom touching conditions are true
+    current == 1 && (top_touching || bottom_touching)
+  end
 
-    # Flag to check if touching a ship part on the bottom right
-    bottom_right = row_idx < board.length - 1 && idx < board[row_idx].length - 1 && board[row_idx + 1][idx + 1] == 1
+  # Checks if a current ship part is touching another ship part on either
+  # the top left and/or the top right
+  # @param [Numeric] idx - The index of the current character being checked
+  # @param [Numeric] row_idx - The index of the row being checked from the board array
+  # @param [Enumerable] board - The current board being checked - either normal or transposed
+  # @return [Boolean]
+  def check_top_touching_part?(idx, row_idx, board)
+    # If the current row index is bigger than 1, check the previous (top) row for ship parts
+    if row_idx.positive?
+      # Returns true if there's a ship part on the top left
+      return true if idx.positive? && board[row_idx - 1][idx - 1] == 1
 
-    # Returns true if touching a ship part on either
-    # the top left, top right, bottom left, or bottom right
-    top_left || top_right || bottom_left || bottom_right
+      # Returns true if there's a ship part on the top right
+      return true if idx < board[row_idx].length - 1 && board[row_idx - 1][idx + 1] == 1
+    end
+
+    # The current row is the first (0) row and can't be checked
+    false
+  end
+
+  # Checks if a current ship part is touching another ship part on either
+  # the bottom left and/or the bottom right
+  # @param [Numeric] idx - The index of the current character being checked
+  # @param [Numeric] row_idx - The index of the row being checked from the board array
+  # @param [Enumerable] board - The current board being checked - either normal or transposed
+  # @return [Boolean]
+  def check_bottom_touching_part?(idx, row_idx, board)
+    # If the current row index is less than the board length, check the next (bottom) row for ship parts
+    if row_idx < board.length - 1
+      # Returns true if there's a ship part on the bottom left
+      return true if idx.positive? && board[row_idx + 1][idx - 1] == 1
+
+      # Returns true if there's a ship part on the bottom right
+      return true if idx < board[row_idx].length - 1 && board[row_idx + 1][idx + 1] == 1
+    end
+
+    # The current row is the last row and can't be checked
+    false
   end
 
   # Goes over the @ships hash and checks if found ships on the board
