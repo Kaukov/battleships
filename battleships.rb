@@ -1,24 +1,23 @@
+# frozen_string_literal: true
+
 require 'pry'
 
+# Battleships game board validator
 class Battleships
   # Battleship and empty space characters used in the input string
   CHAR_SHIP = '*'
   CHAR_EMPTYSPACE = '-'
 
-  # Define how many ships of type in total are allowed on the board
-  COUNT_BATTLESHIPS = 1
-  COUNT_CRUISERS = 2
-  COUNT_DESTROYERS = 3
-  COUNT_SUBMARINES = 4
-
-  # Define the size of all allowed ships
-  SIZE_BATTLESHIP = 4
-  SIZE_CRUISER = 3
-  SIZE_DESTROYER = 2
-  SIZE_SUBMARINE = 1
-
-  # The max ship size from all allowed ships
-  SIZE_MAX = SIZE_BATTLESHIP
+  # Ship types and properties:
+  # Each ship should have its name in singular, and be a hash
+  # with properties :size and :count, each representing the spaces a ship
+  # takes on the board, and how many of the ship type are allowed on the board
+  SHIP_DEFINITIONS = {
+    BATTLESHIP: { size: 4, count: 1 },
+    CRUISER: { size: 3, count: 2 },
+    DESTROYER: { size: 2, count: 3 },
+    SUBMARINE: { size: 1, count: 4 }
+  }.freeze
 
   def initialize(input)
     @valid_board = true
@@ -28,12 +27,11 @@ class Battleships
     @game_board = []
 
     # Count all ship types on the board
-    @ships = {
-      "#{SIZE_BATTLESHIP}": 0,
-      "#{SIZE_CRUISER}": 0,
-      "#{SIZE_DESTROYER}": 0,
-      "#{SIZE_SUBMARINE}": 0
-    }
+    @ships = SHIP_DEFINITIONS.each_with_object({}) { |(_k, v), memo| memo[v[:size].to_s] = 0 }
+
+    # The max ship size from all allowed ships
+    @max_ship_size = SHIP_DEFINITIONS[:BATTLESHIP][:size]
+    # @max_ship_size = SHIP_DEFINITIONS.map { |_s, v| v[:size] }.max
 
     # Fill the game board with 0s and 1s by reading each line of the input string
     input.lines.each_with_index { |str| @game_board << ships_from_string(str) }
@@ -68,7 +66,8 @@ class Battleships
 
         current_ship += 1 if c == 1
 
-        @valid_board = false if c == 1 && check_touching_ships?(idx, row_idx, board_to_check) || current_ship > SIZE_MAX
+        @valid_board = false if c == 1 && check_touching_ships?(idx, row_idx, board_to_check) ||
+                                current_ship > @max_ship_size
 
         if check_vertical_ship? c, idx, row_idx, board_to_check
           current_ship = 0
@@ -84,7 +83,7 @@ class Battleships
           next
         end
 
-        @ships[:"#{current_ship}"] += 1
+        @ships[current_ship.to_s] += 1
 
         current_ship = 0
       end
@@ -108,10 +107,7 @@ class Battleships
   end
 
   def valid_ship_counts?
-    return false if (@ships[:"#{SIZE_BATTLESHIP}"] <=> COUNT_BATTLESHIPS) != 0
-    return false if (@ships[:"#{SIZE_CRUISER}"] <=> COUNT_CRUISERS) != 0
-    return false if (@ships[:"#{SIZE_DESTROYER}"] <=> COUNT_DESTROYERS) != 0
-    return false if (@ships[:"#{SIZE_SUBMARINE}"] <=> COUNT_SUBMARINES) != 0
+    SHIP_DEFINITIONS.each { |_k, v| return false if (@ships[v[:size].to_s] <=> v[:count]) != 0 }
 
     true
   end
