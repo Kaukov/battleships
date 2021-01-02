@@ -37,6 +37,9 @@ class Battleships
 
     # Fill the game board with 0s and 1s by reading each line of the input string
     input.lines.each_with_index { |str| @game_board << ships_from_string(str) }
+
+    find_ships
+    find_ships transpose: true
   end
 
   # Returns an array of 0s and 1s, indicating battleship placements
@@ -50,6 +53,58 @@ class Battleships
     end
 
     arr
+  end
+
+  def find_ships(transpose: false)
+    board_to_check = transpose ? @game_board.transpose : @game_board
+
+    board_to_check.each_with_index do |row, row_idx|
+      break unless @valid_board
+
+      current_ship = 0
+
+      row.each_with_index do |c, idx|
+        break unless @valid_board
+
+        current_ship += 1 if c == 1
+
+        @valid_board = false if c == 1 && check_touching_ships?(idx, row_idx, board_to_check) || current_ship > SIZE_MAX
+
+        if check_vertical_ship? c, idx, row_idx, board_to_check
+          current_ship = 0
+          next
+        end
+
+        next unless c.zero? || idx == row.length - 1
+
+        next unless current_ship.positive?
+
+        if current_ship == 1 && transpose
+          current_ship = 0
+          next
+        end
+
+        @ships[:"#{current_ship}"] += 1
+
+        current_ship = 0
+      end
+    end
+  end
+
+  def check_vertical_ship?(current, idx, row_idx, board)
+    ship_part_above = row_idx < board.length - 1 && board[row_idx + 1][idx] == 1
+    ship_part_below = row_idx.positive? && board[row_idx - 1][idx] == 1
+
+    current == 1 && (ship_part_above || ship_part_below)
+  end
+
+  def check_touching_ships?(idx, row_idx, board)
+    top_left = row_idx.positive? && idx.positive? && board[row_idx - 1][idx - 1] == 1
+    top_right = row_idx.positive? && idx < board[row_idx].length - 1 && board[row_idx - 1][idx + 1] == 1
+    bottom_left = row_idx < board.length - 1 && idx.positive? && board[row_idx + 1][idx - 1] == 1
+    bottom_right = row_idx < board.length - 1 && idx < board[row_idx].length - 1 && board[row_idx + 1][idx + 1] == 1
+
+    top_left || top_right || bottom_left || bottom_right
   end
 
   def valid_ship_counts?
