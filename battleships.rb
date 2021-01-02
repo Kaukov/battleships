@@ -23,7 +23,7 @@ class Battleships
   def initialize(input)
     # Array to be filled with 0s and 1s depending
     # on the board placement of the battleships
-    game_board = []
+    @game_board = []
 
     # Count all ship types on the board
     @ships = {
@@ -34,7 +34,7 @@ class Battleships
     }
 
     # Fill the game board with 0s and 1s by reading each line of the input string
-    input.lines.each_with_index { |str| game_board << ships_from_string(str) }
+    input.lines.each_with_index { |str| @game_board << ships_from_string(str) }
   end
 
   # Returns an array of 0s and 1s, indicating battleship placements
