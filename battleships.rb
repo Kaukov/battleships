@@ -21,6 +21,8 @@ class Battleships
   SIZE_MAX = SIZE_BATTLESHIP
 
   def initialize(input)
+    @valid_board = true
+
     # Array to be filled with 0s and 1s depending
     # on the board placement of the battleships
     @game_board = []
@@ -62,6 +64,6 @@ class Battleships
   def valid?
     return false unless valid_ship_counts?
 
-    true
+    @valid_board
   end
 end
